@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reports</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <h2> DiagnoCare</h2>
+            <p id="patientName"></p>
+            <br>
+            <a href="/patient/dashboard.html"> Dashboard</a>
+            <a href="/patient/book-test.html"> Book a Test</a>
+            <a href="/patient/my-reports.html"> My Reports</a>
+            <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
+        </div>
+
+        <div class="main-content">
+            <h2> My Reports</h2>
+            <br>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Test Name</th>
+                        <th>Upload Date</th>
+                        <th>Remarks</th>
+                        <th>Doctor</th>
+                        <th>Doctor Remark</th>
+                    </tr>
+                </thead>
+                <tbody id="reportsTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        const name = localStorage.getItem('name');
+        const userEmail = localStorage.getItem('userEmail');
+
+        if (!token || role !== 'PATIENT') {
+            window.location.href = '/login.html';
+        }
+
+        document.getElementById('patientName').innerText = 'Hello, ' + name;
+
+        const headers = { 'Authorization': 'Bearer ' + token };
+
+        async function loadReports() {
+            const reports = await fetch('/api/patient/reports?email=' + userEmail, { headers }).then(r => r.json());
+            const tbody = document.getElementById('reportsTable');
+            tbody.innerHTML = '';
+
+            if (reports.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No reports found</td></tr>';
+                return;
+            }
+
+            reports.forEach(report => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${report.id}</td>
+                        <td>${report.test.testName}</td>
+                        <td>${report.uploadDate ? report.uploadDate : 'N/A'}</td>
+                        <td>${report.remarks ? report.remarks : 'N/A'}</td>
+                        <td>${report.doctor ? report.doctor.name : 'Not assigned'}</td>
+                        <td>${report.doctorRemark ? report.doctorRemark : 'No remark yet'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        loadReports();
+    </script>
+</body>
+</html>

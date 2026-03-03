@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2> DiagnoCare</h2>
+            <p id="adminName"></p>
+            <br>
+            <a href="/admin/dashboard.html"> Dashboard</a>
+            <a href="/admin/tests.html">Manage Tests</a>
+            <a href="/admin/reports.html"> Manage Reports</a>
+            <a href="/admin/bookings.html"> Manage Bookings</a>
+            <a href="/admin/users.html">Manage Users</a>
+            <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <h2>Welcome to Admin Dashboard</h2>
+            <br>
+            <div class="cards">
+                <div class="card">
+                    <h3 id="totalUsers">0</h3>
+                    <p>Total Users</p>
+                </div>
+                <div class="card">
+                    <h3 id="totalTests">0</h3>
+                    <p>Total Tests</p>
+                </div>
+                <div class="card">
+                    <h3 id="totalReports">0</h3>
+                    <p>Total Reports</p>
+                </div>
+                <div class="card">
+                    <h3 id="totalBookings">0</h3>
+                    <p>Total Bookings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if logged in
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        const name = localStorage.getItem('name');
+
+        if (!token || role !== 'ADMIN') {
+            window.location.href = '/login.html';
+        }
+
+        document.getElementById('adminName').innerText = 'Hello, ' + name;
+
+        // Load dashboard data
+        async function loadDashboard() {
+            const headers = { 'Authorization': 'Bearer ' + token };
+
+            const users = await fetch('/api/admin/users', { headers }).then(r => r.json());
+            const tests = await fetch('/api/admin/tests', { headers }).then(r => r.json());
+            const reports = await fetch('/api/admin/reports', { headers }).then(r => r.json());
+            const bookings = await fetch('/api/admin/bookings', { headers }).then(r => r.json());
+
+            document.getElementById('totalUsers').innerText = users.length;
+            document.getElementById('totalTests').innerText = tests.length;
+            document.getElementById('totalReports').innerText = reports.length;
+            document.getElementById('totalBookings').innerText = bookings.length;
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('role');
+            localStorage.removeItem('name');
+            window.location.href = '/login.html';
+        }
+
+        loadDashboard();
+    </script>
+</body>
+</html>
