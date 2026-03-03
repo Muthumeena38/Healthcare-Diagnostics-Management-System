@@ -3,6 +3,7 @@ package com.diagnocare.hdms.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Data
 @Entity
@@ -31,6 +32,7 @@ public class Report {
     @Column(name = "file_name")
     private String fileName;
 
+    @JsonIgnore
     @Lob
     @Column(name = "file_content", columnDefinition = "LONGBLOB")
     private byte[] fileContent;
