@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Reports</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <h2> DiagnoCare</h2>
+            <p id="doctorName"></p>
+            <br>
+            <a href="/doctor/dashboard.html"> Dashboard</a>
+            <a href="/doctor/view-reports.html"> View Reports</a>
+            <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
+        </div>
+
+        <div class="main-content">
+            <h2> View Reports</h2>
+            <br>
+
+            <div id="success-msg" class="success-msg"></div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Patient</th>
+                        <th>Test</th>
+                        <th>Upload Date</th>
+                        <th>Remarks</th>
+                        <th>Doctor Remark</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="reportsTable">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        const name = localStorage.getItem('name');
+        const userEmail = localStorage.getItem('userEmail');
+
+        if (!token || role !== 'DOCTOR') {
+            window.location.href = '/login.html';
+        }
+
+        document.getElementById('doctorName').innerText = 'Hello, Dr. ' + name;
+
+        const headers = { 'Authorization': 'Bearer ' + token };
+
+        async function loadReports() {
+            const reports = await fetch('/api/doctor/reports', { headers }).then(r => r.json());
+            const tbody = document.getElementById('reportsTable');
+            tbody.innerHTML = '';
+
+            if (reports.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No reports found</td></tr>';
+                return;
+            }
+
+            reports.forEach(report => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${report.id}</td>
+                        <td>${report.patient.name}</td>
+                        <td>${report.test.testName}</td>
+                        <td>${report.uploadDate ? report.uploadDate : 'N/A'}</td>
+                        <td>${report.remarks ? report.remarks : 'N/A'}</td>
+                        <td>${report.doctorRemark ? report.doctorRemark : 'No remark yet'}</td>
+                        <td>
+                            <input type="text" id="remark-${report.id}"
+                                placeholder="Add remark"
+                                style="padding:5px; border:1px solid #ddd; border-radius:5px;">
+                            <button class="btn" style="padding:5px 10px; margin-top:5px;"
+                                onclick="addRemark(${report.id})">
+                                Save
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function addRemark(reportId) {
+            const remark = document.getElementById('remark-' + reportId).value;
+
+            if (!remark) {
+                alert('Please enter a remark!');
+                return;
+            }
+
+            const response = await fetch(
+                '/api/doctor/reports/' + reportId + '/remark?remark=' + remark + '&email=' + userEmail,
+                { method: 'PUT', headers }
+            );
+
+            if (response.ok) {
+                document.getElementById('success-msg').innerText = 'Remark added successfully!';
+                loadReports();
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        loadReports();
+    </script>
+</body>
+</html>

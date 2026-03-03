@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Test</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <h2> DiagnoCare</h2>
+            <p id="patientName"></p>
+            <br>
+            <a href="/patient/dashboard.html"> Dashboard</a>
+            <a href="/patient/book-test.html"> Book a Test</a>
+            <a href="/patient/my-reports.html"> My Reports</a>
+            <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
+        </div>
+
+        <div class="main-content">
+            <h2> Book a Test</h2>
+            <br>
+
+            <div id="success-msg" class="success-msg"></div>
+            <div id="error-msg" class="error-msg"></div>
+
+            <div class="cards" id="testsContainer">
+            </div>
+
+            <!-- Booking Form -->
+            <div class="auth-box" style="text-align:left; margin-top:30px;">
+                <h3>Confirm Booking</h3>
+                <br>
+                <div class="form-group">
+                    <label>Selected Test</label>
+                    <input type="text" id="selectedTest" readonly>
+                    <input type="hidden" id="selectedTestId">
+                </div>
+                <div class="form-group">
+                    <label>Booking Date</label>
+                    <input type="date" id="bookingDate">
+                </div>
+                <div class="form-group">
+                    <label>Notes</label>
+                    <input type="text" id="notes" placeholder="Any special notes">
+                </div>
+                <button class="btn" onclick="bookTest()">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+        const name = localStorage.getItem('name');
+        const userEmail = localStorage.getItem('userEmail');
+
+        if (!token || role !== 'PATIENT') {
+            window.location.href = '/login.html';
+        }
+
+        document.getElementById('patientName').innerText = 'Hello, ' + name;
+
+        const headers = { 'Authorization': 'Bearer ' + token };
+
+        async function loadTests() {
+            const tests = await fetch('/api/patient/tests', { headers }).then(r => r.json());
+            const container = document.getElementById('testsContainer');
+            container.innerHTML = '';
+            tests.forEach(test => {
+                container.innerHTML += `
+                    <div class="card" style="cursor:pointer" onclick="selectTest(${test.id}, '${test.testName}')">
+                        <h3>₹${test.price}</h3>
+                        <p><strong>${test.testName}</strong></p>
+                        <p>${test.category}</p>
+                        <p style="font-size:12px">${test.description}</p>
+                    </div>
+                `;
+            });
+        }
+
+        function selectTest(id, name) {
+            document.getElementById('selectedTestId').value = id;
+            document.getElementById('selectedTest').value = name;
+        }
+
+        async function bookTest() {
+            const testId = document.getElementById('selectedTestId').value;
+            const bookingDate = document.getElementById('bookingDate').value;
+            const notes = document.getElementById('notes').value;
+
+            if (!testId) {
+                document.getElementById('error-msg').innerText = 'Please select a test!';
+                return;
+            }
+
+            if (!bookingDate) {
+                document.getElementById('error-msg').innerText = 'Please select a date!';
+                return;
+            }
+
+            const response = await fetch('/api/patient/book-test/' + testId + '?email=' + userEmail, {
+                method: 'POST',
+                headers: { ...headers, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingDate, notes })
+            });
+
+            if (response.ok) {
+                document.getElementById('success-msg').innerText = 'Test booked successfully!';
+                document.getElementById('error-msg').innerText = '';
+                setTimeout(() => {
+                    window.location.href = '/patient/dashboard.html';
+                }, 1500);
+            } else {
+                document.getElementById('error-msg').innerText = 'Booking failed!';
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        loadTests();
+    </script>
+</body>
+</html>
