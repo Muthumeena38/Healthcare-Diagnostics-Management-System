@@ -25,11 +25,15 @@ public class Report {
     @JoinColumn(name = "booking_id")
     private Booking booking;
 
-    @Column(name = "file_path", nullable = false)
+    @Column(name = "file_path")
     private String filePath;
 
     @Column(name = "file_name")
     private String fileName;
+
+    @Lob
+    @Column(name = "file_content", columnDefinition = "LONGBLOB")
+    private byte[] fileContent;
 
     @ManyToOne
     @JoinColumn(name = "uploaded_by", nullable = false)

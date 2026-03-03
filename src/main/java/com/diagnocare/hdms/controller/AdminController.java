@@ -6,6 +6,8 @@ import com.diagnocare.hdms.model.Test;
 import com.diagnocare.hdms.model.User;
 import com.diagnocare.hdms.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,14 +53,24 @@ public class AdminController {
             @RequestParam("patientId") Long patientId,
             @RequestParam("testId") Long testId,
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value="remarks",required=false) String remarks,
-            @AuthenticationPrincipal UserDetails userDetails) throws IOException{
+            @RequestParam(value="remarks", required=false) String remarks,
+            @AuthenticationPrincipal UserDetails userDetails) throws IOException {
 
-        User admin=userRepository.findByEmail(userDetails.getUsername()).orElseThrow(() -> new RuntimeException("Admin not found"));
+        User admin = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Admin not found"));
         return ResponseEntity.ok(
-                adminService.uploadReport(patientId,testId,admin.getId(),file,remarks)
-
+                adminService.uploadReport(patientId, testId, admin.getId(), file, remarks)
         );
+    }
+
+    // Download/View PDF endpoint
+    @GetMapping("/reports/{id}/view")
+    public ResponseEntity<byte[]> viewReport(@PathVariable Long id) {
+        Report report = adminService.getReportById(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + report.getFileName() + "\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(report.getFileContent());
     }
 
     @GetMapping("/reports")
@@ -66,7 +78,7 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllReports());
     }
 
-    @DeleteMapping("/reports/id")
+    @DeleteMapping("/reports/{id}")
     public ResponseEntity<String> deleteReport(@PathVariable Long id){
         adminService.deleteReport(id);
         return ResponseEntity.ok("Report deleted Successfully");
@@ -80,8 +92,7 @@ public class AdminController {
     @PutMapping("/bookings/{id}/status")
     public ResponseEntity<Booking> updateBookingStatus(
             @PathVariable Long id,
-            @RequestParam Booking.Status status
-    ){
-        return ResponseEntity.ok(adminService.updateBookingStatus(id,status));
+            @RequestParam Booking.Status status){
+        return ResponseEntity.ok(adminService.updateBookingStatus(id, status));
     }
 }
