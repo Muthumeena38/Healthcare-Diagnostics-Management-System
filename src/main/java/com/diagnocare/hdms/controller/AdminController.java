@@ -25,6 +25,9 @@ public class AdminController {
     private AdminService adminService;
 
     @Autowired
+    private com.diagnocare.hdms.security.JwtUtil jwtUtil;
+
+    @Autowired
     private com.diagnocare.hdms.repository.UserRepository userRepository;
 
     @GetMapping("/users")
@@ -49,15 +52,19 @@ public class AdminController {
     }
 
     @PostMapping("/reports/upload")
+
     public ResponseEntity<Report> uploadReport(
             @RequestParam("patientId") Long patientId,
             @RequestParam("testId") Long testId,
             @RequestParam("file") MultipartFile file,
             @RequestParam(value="remarks", required=false) String remarks,
-            @AuthenticationPrincipal UserDetails userDetails) throws IOException {
+            @RequestHeader("Authorization") String authHeader) throws IOException {
 
-        User admin = userRepository.findByEmail(userDetails.getUsername())
+        String token = authHeader.substring(7);
+        String adminEmail = jwtUtil.getEmailFromToken(token);
+        User admin = userRepository.findByEmail(adminEmail)
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
+
         return ResponseEntity.ok(
                 adminService.uploadReport(patientId, testId, admin.getId(), file, remarks)
         );
@@ -94,5 +101,17 @@ public class AdminController {
             @PathVariable Long id,
             @RequestParam Booking.Status status){
         return ResponseEntity.ok(adminService.updateBookingStatus(id, status));
+    }
+
+    @GetMapping("/doctors/pending")
+    public ResponseEntity<List<User>> getPendingDoctors() {
+        return ResponseEntity.ok(adminService.getPendingDoctors());
+    }
+
+    @PutMapping("/doctors/{id}/status")
+    public ResponseEntity<User> updateDoctorStatus(
+            @PathVariable Long id,
+            @RequestParam User.Status status) {
+        return ResponseEntity.ok(adminService.updateDoctorStatus(id, status));
     }
 }

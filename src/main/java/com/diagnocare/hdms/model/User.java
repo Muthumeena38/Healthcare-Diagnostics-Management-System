@@ -26,10 +26,24 @@ public class User {
     @Column(nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private Status status = Status.ACTIVE;
+
+    @Column(name = "license_number")
+    private String licenseNumber;
+
+    @Column(name = "specialization")
+    private String specialization;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public enum Role {
         ADMIN, PATIENT, DOCTOR
+    }
+
+    public enum Status {
+        ACTIVE, PENDING, APPROVED, REJECTED
     }
 }

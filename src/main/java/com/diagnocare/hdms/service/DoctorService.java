@@ -1,4 +1,5 @@
 package com.diagnocare.hdms.service;
+
 import com.diagnocare.hdms.model.Report;
 import com.diagnocare.hdms.model.User;
 import com.diagnocare.hdms.repository.ReportRepository;
@@ -17,25 +18,24 @@ public class DoctorService {
     @Autowired
     private ReportRepository reportRepository;
 
-    public List<Report> getAllReports(){
+    public List<Report> getAllReports() {
         return reportRepository.findAll();
     }
 
-    public List<Report> getPatientReports(Long patientId){
-        User patient=userRepository.findById(patientId)
-                .orElseThrow(()-> new RuntimeException("Patient not found"));
+    public List<Report> getPatientReports(Long patientId) {
+        User patient = userRepository.findById(patientId)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
         return reportRepository.findByPatient(patient);
     }
 
-    public Report addRemark(Long reportId,String doctorEmail,String remark){
-        Report report=reportRepository.findById(reportId)
-                .orElseThrow(()-> new RuntimeException("Report not found"));
-        User doctor=userRepository.findByEmail(doctorEmail)
-                .orElseThrow(()-> new RuntimeException("Doctor not found"));
+    public Report addRemark(Long reportId, String doctorEmail, String remark) {
+        Report report = reportRepository.findById(reportId)
+                .orElseThrow(() -> new RuntimeException("Report not found"));
+        User doctor = userRepository.findByEmail(doctorEmail)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
         report.setDoctor(doctor);
-        report.setRemarks(remark);
+        report.setDoctorRemark(remark);
         report.setDoctorRemarkDate(LocalDateTime.now());
-
         return reportRepository.save(report);
     }
 }

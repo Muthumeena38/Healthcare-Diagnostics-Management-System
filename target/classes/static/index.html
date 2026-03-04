@@ -7,33 +7,125 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+
+    <!-- NAVBAR -->
     <nav class="navbar">
         <h1>🏥 DiagnoCare</h1>
-        <div>
-            <a href="/login.html" class="btn">Login</a>
-            <a href="/register.html" class="btn btn-outline">Register</a>
+        <div class="navbar-links">
+            <a href="/login.html" class="btn btn-outline" style="color: var(--primary); border-color: var(--primary);">Login</a>
+            <a href="/register.html" class="btn">Register</a>
         </div>
     </nav>
 
+    <!-- HERO -->
     <div class="hero">
-        <h1>Healthcare Diagnostics Management System</h1>
-        <p>Book lab tests, view reports, and get doctor remarks — all in one place.</p>
-        <a href="/register.html" class="btn">Get Started</a>
+        <div class="hero-content">
+            <h1>Your Health Records, <em>Simplified</em></h1>
+            <p>Book lab tests, view reports securely, and get doctor remarks — all in one place.</p>
+            <div class="hero-buttons">
+                <a href="/register.html" class="btn" style="background: var(--accent); color: white; font-size:16px; padding: 14px 32px;">
+                    Get Started →
+                </a>
+                <a href="/login.html" class="btn btn-outline" style="font-size:16px; padding: 14px 32px;">
+                    Login
+                </a>
+            </div>
+        </div>
     </div>
 
-    <div class="features">
-        <div class="feature-card">
-            <h2>🧪 Book Tests</h2>
-            <p>Browse and book from a wide range of lab tests easily online.</p>
+    <!-- STATS -->
+    <div style="background: white; padding: 40px; display: flex; justify-content: center; gap: 60px; flex-wrap: wrap; border-bottom: 1px solid var(--border);">
+        <div style="text-align:center">
+            <div style="font-size:36px; font-weight:800; color:var(--primary);">500+</div>
+            <div style="font-size:13px; color:var(--text-light); font-weight:500; text-transform:uppercase; letter-spacing:0.5px;">Tests Available</div>
         </div>
-        <div class="feature-card">
-            <h2>📋 View Reports</h2>
-            <p>Access your lab reports anytime from anywhere securely.</p>
+        <div style="text-align:center">
+            <div style="font-size:36px; font-weight:800; color:var(--primary);">100%</div>
+            <div style="font-size:13px; color:var(--text-light); font-weight:500; text-transform:uppercase; letter-spacing:0.5px;">Secure Reports</div>
         </div>
-        <div class="feature-card">
-            <h2>👨‍⚕️ Doctor Remarks</h2>
-            <p>Get your reports reviewed and remarked by your doctor online.</p>
+        <div style="text-align:center">
+            <div style="font-size:36px; font-weight:800; color:var(--primary);">24/7</div>
+            <div style="font-size:13px; color:var(--text-light); font-weight:500; text-transform:uppercase; letter-spacing:0.5px;">Access Anytime</div>
+        </div>
+        <div style="text-align:center">
+            <div style="font-size:36px; font-weight:800; color:var(--primary);">Verified</div>
+            <div style="font-size:13px; color:var(--text-light); font-weight:500; text-transform:uppercase; letter-spacing:0.5px;">Doctors Only</div>
         </div>
     </div>
+
+    <!-- FEATURES -->
+    <div class="features">
+        <div class="features-heading">
+            <h2>Everything You Need</h2>
+            <p>A complete healthcare diagnostics platform for patients, doctors and admins</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🧪</div>
+                <h2>Book Tests</h2>
+                <p>Browse and book from a wide range of lab tests easily online. Select your preferred date and get confirmed instantly.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h2>View Reports</h2>
+                <p>Access your lab reports anytime from anywhere securely. Download PDF reports with a single click.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👨‍⚕️</div>
+                <h2>Doctor Remarks</h2>
+                <p>Get your reports reviewed and remarked by verified doctors. Your complete medical history in one place.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h2>Privacy First</h2>
+                <p>Your health data is secure and private. Only verified doctors and you can access your reports.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">✅</div>
+                <h2>Verified Doctors</h2>
+                <p>All doctors are verified by admin with their medical license number before they can access the platform.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h2>Access Anywhere</h2>
+                <p>Access your health records from any device, anytime. Mobile friendly and easy to use.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div style="background: white; padding: 80px 40px; text-align:center; border-top: 1px solid var(--border);">
+        <h2 style="font-family: 'DM Serif Display', serif; font-size:36px; margin-bottom:12px;">How It Works</h2>
+        <p style="color: var(--text-light); margin-bottom: 50px;">Simple steps to manage your health</p>
+        <div style="display:flex; justify-content:center; gap:40px; flex-wrap:wrap; max-width:900px; margin:0 auto;">
+            <div style="flex:1; min-width:200px; padding:24px;">
+                <div style="width:56px; height:56px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; margin:0 auto 16px;">1</div>
+                <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">Register</h3>
+                <p style="font-size:14px; color:var(--text-light);">Create your account as patient or doctor</p>
+            </div>
+            <div style="flex:1; min-width:200px; padding:24px;">
+                <div style="width:56px; height:56px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; margin:0 auto 16px;">2</div>
+                <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">Book a Test</h3>
+                <p style="font-size:14px; color:var(--text-light);">Choose from available lab tests and book online</p>
+            </div>
+            <div style="flex:1; min-width:200px; padding:24px;">
+                <div style="width:56px; height:56px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; margin:0 auto 16px;">3</div>
+                <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">Get Report</h3>
+                <p style="font-size:14px; color:var(--text-light);">Admin uploads your report securely</p>
+            </div>
+            <div style="flex:1; min-width:200px; padding:24px;">
+                <div style="width:56px; height:56px; background:var(--accent); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; margin:0 auto 16px;">4</div>
+                <h3 style="font-size:16px; font-weight:700; margin-bottom:8px;">Doctor Review</h3>
+                <p style="font-size:14px; color:var(--text-light);">Verified doctor reviews and adds remarks</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer style="background: var(--text-dark); color: rgba(255,255,255,0.6); text-align:center; padding: 32px 40px;">
+        <p style="font-family: 'DM Serif Display', serif; font-size:20px; color:white; margin-bottom:8px;">🏥 DiagnoCare</p>
+        <p style="font-size:13px;">© 2026 DiagnoCare. All rights reserved. Your health, our priority.</p>
+    </footer>
+
 </body>
 </html>

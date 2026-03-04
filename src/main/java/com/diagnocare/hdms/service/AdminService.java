@@ -11,6 +11,7 @@ import com.diagnocare.hdms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.diagnocare.hdms.model.User;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -94,6 +95,17 @@ public class AdminService {
     public Report getReportById(Long id) {
         return reportRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Report not found"));
+    }
+
+    public List<User> getPendingDoctors() {
+        return userRepository.findByRoleAndStatus(User.Role.DOCTOR, User.Status.PENDING);
+    }
+
+    public User updateDoctorStatus(Long doctorId, User.Status status) {
+        User doctor = userRepository.findById(doctorId)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+        doctor.setStatus(status);
+        return userRepository.save(doctor);
     }
 
 }

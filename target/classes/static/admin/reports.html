@@ -15,6 +15,7 @@
             <a href="/admin/reports.html"> Manage Reports</a>
             <a href="/admin/bookings.html"> Manage Bookings</a>
             <a href="/admin/users.html"> Manage Users</a>
+            <a href="/admin/verify-doctors.html"> Verify Doctors</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
 
@@ -90,10 +91,12 @@
                         <td>${report.uploadedBy.name}</td>
                         <td>${report.uploadDate ? report.uploadDate : 'N/A'}</td>
                         <td>${report.remarks ? report.remarks : 'N/A'}</td>
-                        <td>
-                            <button class="btn" style="background:red; padding:5px 10px;"
-                                onclick="deleteReport(${report.id})">Delete</button>
-                        </td>
+                      <td>
+                      <a href="/api/admin/reports/${report.id}/view" target="_blank" 
+                     class="btn" style="padding:5px 10px; margin-right:5px;">View PDF</a>
+                      <button class="btn" style="background:red; padding:5px 10px;"
+                    onclick="deleteReport(${report.id})">Delete</button>
+                     </td>
                     </tr>
                 `;
             });

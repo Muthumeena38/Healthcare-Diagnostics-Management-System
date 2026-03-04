@@ -9,20 +9,27 @@
 <body>
     <div class="layout">
         <div class="sidebar">
-            <h2> DiagnoCare</h2>
+            <h2>DiagnoCare</h2>
             <p id="doctorName"></p>
             <br>
-            <a href="/doctor/dashboard.html"> Dashboard</a>
-            <a href="/doctor/view-reports.html"> View Reports</a>
+            <a href="/doctor/dashboard.html">Dashboard</a>
+            <a href="/doctor/view-reports.html">View Reports</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
-
         <div class="main-content">
-            <h2> View Reports</h2>
+            <h2>View Patient Reports</h2>
             <br>
-
+            <div class="auth-box" style="text-align:left; margin-bottom:20px;">
+                <h3>Search Patient by ID</h3>
+                <br>
+                <div class="form-group">
+                    <label>Patient ID</label>
+                    <input type="number" id="patientId" placeholder="Enter patient ID">
+                </div>
+                <button class="btn" onclick="searchPatient()">Search</button>
+            </div>
             <div id="success-msg" class="success-msg"></div>
-
+            <div id="error-msg" class="error-msg"></div>
             <table>
                 <thead>
                     <tr>
@@ -32,11 +39,11 @@
                         <th>Upload Date</th>
                         <th>Remarks</th>
                         <th>Doctor Remark</th>
+                        <th>Report</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="reportsTable">
-                </tbody>
+                <tbody id="reportsTable"></tbody>
             </table>
         </div>
     </div>
@@ -55,13 +62,27 @@
 
         const headers = { 'Authorization': 'Bearer ' + token };
 
-        async function loadReports() {
-            const reports = await fetch('/api/doctor/reports', { headers }).then(r => r.json());
+        async function searchPatient() {
+            const patientId = document.getElementById('patientId').value;
+            if (!patientId) {
+                document.getElementById('error-msg').innerText = 'Please enter patient ID!';
+                return;
+            }
+
+            const response = await fetch('/api/doctor/patient/' + patientId + '/reports', { headers });
+
+            if (!response.ok) {
+                document.getElementById('error-msg').innerText = 'Patient not found!';
+                return;
+            }
+
+            const reports = await response.json();
             const tbody = document.getElementById('reportsTable');
             tbody.innerHTML = '';
+            document.getElementById('error-msg').innerText = '';
 
             if (reports.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No reports found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No reports found for this patient</td></tr>';
                 return;
             }
 
@@ -75,13 +96,15 @@
                         <td>${report.remarks ? report.remarks : 'N/A'}</td>
                         <td>${report.doctorRemark ? report.doctorRemark : 'No remark yet'}</td>
                         <td>
+                            <a href="/api/admin/reports/${report.id}/view" target="_blank"
+                                class="btn" style="padding:5px 10px;">View PDF</a>
+                        </td>
+                        <td>
                             <input type="text" id="remark-${report.id}"
                                 placeholder="Add remark"
                                 style="padding:5px; border:1px solid #ddd; border-radius:5px;">
                             <button class="btn" style="padding:5px 10px; margin-top:5px;"
-                                onclick="addRemark(${report.id})">
-                                Save
-                            </button>
+                                onclick="addRemark(${report.id})">Save</button>
                         </td>
                     </tr>
                 `;
@@ -90,7 +113,6 @@
 
         async function addRemark(reportId) {
             const remark = document.getElementById('remark-' + reportId).value;
-
             if (!remark) {
                 alert('Please enter a remark!');
                 return;
@@ -103,7 +125,7 @@
 
             if (response.ok) {
                 document.getElementById('success-msg').innerText = 'Remark added successfully!';
-                loadReports();
+                searchPatient();
             }
         }
 
@@ -111,8 +133,6 @@
             localStorage.clear();
             window.location.href = '/login.html';
         }
-
-        loadReports();
     </script>
 </body>
 </html>

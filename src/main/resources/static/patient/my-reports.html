@@ -31,6 +31,7 @@
                         <th>Remarks</th>
                         <th>Doctor</th>
                         <th>Doctor Remark</th>
+                        <th>Report</th>
                     </tr>
                 </thead>
                 <tbody id="reportsTable">
@@ -71,7 +72,11 @@
                         <td>${report.uploadDate ? report.uploadDate : 'N/A'}</td>
                         <td>${report.remarks ? report.remarks : 'N/A'}</td>
                         <td>${report.doctor ? report.doctor.name : 'Not assigned'}</td>
-                        <td>${report.doctorRemark ? report.doctorRemark : 'No remark yet'}</td>
+                      <td>${report.doctorRemark ? report.doctorRemark : 'No remark yet'}</td>
+                     <td>
+                      <a href="/api/admin/reports/${report.id}/view" target="_blank"
+                      class="btn" style="padding:5px 10px;">View PDF</a>
+                      </td>
                     </tr>
                 `;
             });

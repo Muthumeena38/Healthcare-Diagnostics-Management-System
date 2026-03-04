@@ -21,8 +21,8 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.getAllReports());
     }
 
-    // Get specific patient reports
-    @GetMapping("/reports/patient/{patientId}")
+    // Get specific patient reports by ID
+    @GetMapping("/patient/{patientId}/reports")
     public ResponseEntity<List<Report>> getPatientReports(
             @PathVariable Long patientId) {
         return ResponseEntity.ok(doctorService.getPatientReports(patientId));

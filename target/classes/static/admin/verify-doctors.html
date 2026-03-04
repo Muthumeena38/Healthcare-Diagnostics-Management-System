@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Doctors</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="layout">
+        <div class="sidebar">
+            <h2>DiagnoCare</h2>
+            <a href="/admin/dashboard.html">Dashboard</a>
+            <a href="/admin/tests.html">Manage Tests</a>
+            <a href="/admin/reports.html">Manage Reports</a>
+            <a href="/admin/bookings.html">Manage Bookings</a>
+            <a href="/admin/users.html">Manage Users</a>
+            <a href="/admin/verify-doctors.html">Verify Doctors</a>
+            <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
+        </div>
+
+        <div class="main-content">
+            <h2>Verify Doctors</h2>
+            <br>
+            <div id="success-msg" class="success-msg"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>License Number</th>
+                        <th>Specialization</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="doctorsTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role = localStorage.getItem('role');
+
+        if (!token || role !== 'ADMIN') {
+            window.location.href = '/login.html';
+        }
+
+        const headers = { 'Authorization': 'Bearer ' + token };
+
+        async function loadPendingDoctors() {
+            const doctors = await fetch('/api/admin/doctors/pending', { headers }).then(r => r.json());
+            const tbody = document.getElementById('doctorsTable');
+            tbody.innerHTML = '';
+
+            if (doctors.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No pending doctors</td></tr>';
+                return;
+            }
+
+            doctors.forEach(doctor => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${doctor.id}</td>
+                        <td>${doctor.name}</td>
+                        <td>${doctor.email}</td>
+                        <td>${doctor.licenseNumber || 'N/A'}</td>
+                        <td>${doctor.specialization || 'N/A'}</td>
+                        <td>
+                            <button class="btn" style="padding:5px 10px; margin-right:5px;"
+                                onclick="updateStatus(${doctor.id}, 'APPROVED')">Approve</button>
+                            <button class="btn" style="background:red; padding:5px 10px;"
+                                onclick="updateStatus(${doctor.id}, 'REJECTED')">Reject</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function updateStatus(doctorId, status) {
+            const response = await fetch('/api/admin/doctors/' + doctorId + '/status?status=' + status, {
+                method: 'PUT',
+                headers
+            });
+
+            if (response.ok) {
+                document.getElementById('success-msg').innerText = 'Doctor ' + status + ' successfully!';
+                loadPendingDoctors();
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+
+        loadPendingDoctors();
+    </script>
+</body>
+</html>

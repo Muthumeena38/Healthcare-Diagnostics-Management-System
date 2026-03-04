@@ -35,10 +35,24 @@ public class AuthService {
         user.setRole(request.getRole());
         user.setCreatedAt(LocalDateTime.now());
 
+        // Doctor needs admin approval
+        if (request.getRole() == User.Role.DOCTOR) {
+            user.setStatus(User.Status.PENDING);
+            user.setLicenseNumber(request.getLicenseNumber());
+            user.setSpecialization(request.getSpecialization());
+        } else {
+            user.setStatus(User.Status.ACTIVE);
+        }
+
         userRepository.save(user);
 
+        // Doctor cannot login until approved
+        if (request.getRole() == User.Role.DOCTOR) {
+            return new AuthResponse(null, user.getRole().name(), user.getName(), "PENDING");
+        }
+
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-        return new AuthResponse(token, user.getRole().name(), user.getName());
+        return new AuthResponse(token, user.getRole().name(), user.getName(), "ACTIVE");
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -49,7 +63,18 @@ public class AuthService {
             throw new RuntimeException("Invalid password");
         }
 
+        // Block pending/rejected doctors
+        if (user.getRole() == User.Role.DOCTOR) {
+            if (user.getStatus() == User.Status.PENDING) {
+                throw new RuntimeException("Your account is pending admin approval");
+            }
+            if (user.getStatus() == User.Status.REJECTED) {
+                throw new RuntimeException("Your account has been rejected");
+            }
+        }
+
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-        return new AuthResponse(token, user.getRole().name(), user.getName());
+        return new AuthResponse(token, user.getRole().name(), user.getName(),
+                user.getStatus() != null ? user.getStatus().name() : "ACTIVE");
     }
 }
