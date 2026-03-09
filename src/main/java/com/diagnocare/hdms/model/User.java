@@ -36,6 +36,12 @@ public class User {
     @Column(name = "specialization")
     private String specialization;
 
+    @Column(name = "health_id", unique = true)
+    private String healthId;
+
+    @Column(name = "phone")
+    private String phone;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -44,6 +50,6 @@ public class User {
     }
 
     public enum Status {
-        ACTIVE, PENDING, APPROVED, REJECTED
+        ACTIVE, PENDING, APPROVED, REJECTED, SUSPENDED
     }
 }

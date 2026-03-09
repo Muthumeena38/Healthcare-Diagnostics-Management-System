@@ -40,9 +40,12 @@ public class AuthService {
             user.setStatus(User.Status.PENDING);
             user.setLicenseNumber(request.getLicenseNumber());
             user.setSpecialization(request.getSpecialization());
-        } else {
-            user.setStatus(User.Status.ACTIVE);
+        }else {
+        user.setStatus(User.Status.ACTIVE);
+        if (request.getRole() == User.Role.PATIENT) {
+            user.setHealthId(generateHealthId());
         }
+    }
 
         userRepository.save(user);
 
@@ -64,17 +67,22 @@ public class AuthService {
         }
 
         // Block pending/rejected doctors
-        if (user.getRole() == User.Role.DOCTOR) {
-            if (user.getStatus() == User.Status.PENDING) {
-                throw new RuntimeException("Your account is pending admin approval");
-            }
-            if (user.getStatus() == User.Status.REJECTED) {
-                throw new RuntimeException("Your account has been rejected");
-            }
+        if (user.getRole() == User.Role.DOCTOR && user.getStatus() == User.Status.PENDING) {
+            throw new RuntimeException("Your account is pending approval");
+        }
+
+        if (user.getStatus() == User.Status.SUSPENDED) {
+            throw new RuntimeException("Account access restricted. Please contact support at support@diagnocare.com");
         }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
         return new AuthResponse(token, user.getRole().name(), user.getName(),
                 user.getStatus() != null ? user.getStatus().name() : "ACTIVE");
+    }
+
+    private String generateHealthId() {
+        int year = LocalDateTime.now().getYear();
+        long count = userRepository.countByRole(User.Role.PATIENT) + 1;
+        return String.format("DC-%d-%05d", year, count);
     }
 }

@@ -20,11 +20,14 @@
             <h2>View Patient Reports</h2>
             <br>
             <div class="auth-box" style="text-align:left; margin-bottom:20px;">
-                <h3>Search Patient by ID</h3>
+                <h3>Search Patient by HEALTH-ID</h3>
                 <br>
                 <div class="form-group">
-                    <label>Patient ID</label>
-                    <input type="number" id="patientId" placeholder="Enter patient ID">
+                   <label>Health ID</label>
+                   <input type="text" id="healthId" placeholder="e.g. DC-2026-00001" 
+                   pattern="DC-\d{4}-\d{5}" maxlength="14"
+                   oninput="this.value = this.value.toUpperCase()"
+                   style="text-transform:uppercase;">
                 </div>
                 <button class="btn" onclick="searchPatient()">Search</button>
             </div>
@@ -63,13 +66,18 @@
         const headers = { 'Authorization': 'Bearer ' + token };
 
         async function searchPatient() {
-            const patientId = document.getElementById('patientId').value;
-            if (!patientId) {
-                document.getElementById('error-msg').innerText = 'Please enter patient ID!';
-                return;
-            }
+          const healthId = document.getElementById('healthId').value.trim().toUpperCase();
+          const pattern = /^DC-\d{4}-\d{5}$/;
+          if (!healthId) {
+          document.getElementById('error-msg').innerText = 'Please enter Health ID!';
+          return;
+        }
+    if (!pattern.test(healthId)) {
+        document.getElementById('error-msg').innerText = 'Invalid format! Use DC-YYYY-NNNNN (e.g. DC-2026-00001)';
+        return;
+    }
 
-            const response = await fetch('/api/doctor/patient/' + patientId + '/reports', { headers });
+    const response = await fetch('/api/doctor/patient/' + healthId + '/reports?email=' + userEmail, { headers });
 
             if (!response.ok) {
                 document.getElementById('error-msg').innerText = 'Patient not found!';

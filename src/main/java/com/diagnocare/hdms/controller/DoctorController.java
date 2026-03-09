@@ -22,10 +22,11 @@ public class DoctorController {
     }
 
     // Get specific patient reports by ID
-    @GetMapping("/patient/{patientId}/reports")
+    @GetMapping("/patient/{healthId}/reports")
     public ResponseEntity<List<Report>> getPatientReports(
-            @PathVariable Long patientId) {
-        return ResponseEntity.ok(doctorService.getPatientReports(patientId));
+            @PathVariable String healthId,
+            @RequestParam String email) {
+        return ResponseEntity.ok(doctorService.getPatientReports(healthId, email));
     }
 
     // Add remark to report

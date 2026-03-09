@@ -1,7 +1,9 @@
 package com.diagnocare.hdms.service;
 
+import com.diagnocare.hdms.model.AuditLog;
 import com.diagnocare.hdms.model.Report;
 import com.diagnocare.hdms.model.User;
+import com.diagnocare.hdms.repository.AuditLogRepository;
 import com.diagnocare.hdms.repository.ReportRepository;
 import com.diagnocare.hdms.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +20,25 @@ public class DoctorService {
     @Autowired
     private ReportRepository reportRepository;
 
+    @Autowired
+    private AuditLogRepository auditLogRepository;
+
     public List<Report> getAllReports() {
         return reportRepository.findAll();
     }
 
-    public List<Report> getPatientReports(Long patientId) {
-        User patient = userRepository.findById(patientId)
+    public List<Report> getPatientReports(String healthId, String doctorEmail) {
+        User patient = userRepository.findByHealthId(healthId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
+        User doctor = userRepository.findByEmail(doctorEmail)
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        AuditLog log = new AuditLog();
+        log.setDoctor(doctor);
+        log.setPatient(patient);
+        log.setViewedAt(LocalDateTime.now());
+        auditLogRepository.save(log);
+
         return reportRepository.findByPatient(patient);
     }
 

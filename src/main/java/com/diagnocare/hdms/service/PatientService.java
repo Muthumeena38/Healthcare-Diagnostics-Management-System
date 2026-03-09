@@ -56,4 +56,9 @@ public class PatientService {
                 orElseThrow(()-> new RuntimeException("Patient not found"));
         return reportRepository.findByPatient(patient);
     }
+
+    public User getProfile(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+    }
 }

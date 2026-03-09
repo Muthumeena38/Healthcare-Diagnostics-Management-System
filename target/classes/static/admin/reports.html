@@ -16,6 +16,7 @@
             <a href="/admin/bookings.html"> Manage Bookings</a>
             <a href="/admin/users.html"> Manage Users</a>
             <a href="/admin/verify-doctors.html"> Verify Doctors</a>
+            <a href="/admin/audit-logs.html">Audit Logs</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
 
@@ -27,10 +28,11 @@
             <div class="auth-box" style="text-align:left; margin-bottom:30px;">
                 <h3>Upload Report</h3>
                 <br>
-                <div class="form-group">
-                    <label>Patient ID</label>
-                    <input type="number" id="patientId" placeholder="Enter patient ID">
-                </div>
+               <div class="form-group">
+               <label>Health ID</label>
+               <input type="text" id="healthId" placeholder="e.g. DC-2026-00001" maxlength="14"
+               oninput="this.value = this.value.toUpperCase()">
+            </div>
                 <div class="form-group">
                     <label>Test ID</label>
                     <input type="number" id="testId" placeholder="Enter test ID">
@@ -103,13 +105,16 @@
         }
 
         async function uploadReport() {
-            const patientId = document.getElementById('patientId').value;
+           const healthId = document.getElementById('healthId').value.trim();
+          const pattern = /^DC-\d{4}-\d{5}$/;
+          if (!healthId) { alert('Please enter Health ID'); return; }
+          if (!pattern.test(healthId)) { alert('Invalid format! Use DC-YYYY-NNNNN (e.g. DC-2026-00001)'); return; }
             const testId = document.getElementById('testId').value;
             const remarks = document.getElementById('remarks').value;
             const file = document.getElementById('reportFile').files[0];
 
             const formData = new FormData();
-            formData.append('patientId', patientId);
+            formData.append('healthId', healthId);
             formData.append('testId', testId);
             formData.append('remarks', remarks);
             formData.append('file', file);

@@ -1,5 +1,3 @@
-
-
 package com.diagnocare.hdms.controller;
 
 import com.diagnocare.hdms.model.Booking;
@@ -10,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import com.diagnocare.hdms.model.User;
 
 @RestController
 @RequestMapping("/api/patient")
@@ -51,6 +50,14 @@ public class PatientController {
             @RequestParam String email) {
         return ResponseEntity.ok(
                 patientService.getMyReports(email)
+        );
+    }
+
+    // Get patient profile with Health ID
+    @GetMapping("/profile")
+    public ResponseEntity<User> getProfile(@RequestParam String email) {
+        return ResponseEntity.ok(
+                patientService.getProfile(email)
         );
     }
 }

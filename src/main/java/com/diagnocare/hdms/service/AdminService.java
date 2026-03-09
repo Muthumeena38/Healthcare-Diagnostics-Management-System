@@ -49,10 +49,10 @@ public class AdminService {
         testRepository.deleteById(id);
     }
 
-    public Report uploadReport(Long patientId, Long testId, Long adminId,
+    public Report uploadReport(String healthId, Long testId, Long adminId,
                                MultipartFile file, String remarks) throws IOException {
 
-        User patient = userRepository.findById(patientId)
+        User patient = userRepository.findByHealthId(healthId)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
         Test test = testRepository.findById(testId)
                 .orElseThrow(() -> new RuntimeException("Test not found"));

@@ -1,9 +1,7 @@
 package com.diagnocare.hdms.controller;
 
-import com.diagnocare.hdms.model.Booking;
-import com.diagnocare.hdms.model.Report;
-import com.diagnocare.hdms.model.Test;
-import com.diagnocare.hdms.model.User;
+import com.diagnocare.hdms.model.*;
+import com.diagnocare.hdms.repository.AuditLogRepository;
 import com.diagnocare.hdms.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -26,6 +24,9 @@ public class AdminController {
 
     @Autowired
     private com.diagnocare.hdms.security.JwtUtil jwtUtil;
+
+    @Autowired
+    private AuditLogRepository auditLogRepository;
 
     @Autowired
     private com.diagnocare.hdms.repository.UserRepository userRepository;
@@ -52,9 +53,8 @@ public class AdminController {
     }
 
     @PostMapping("/reports/upload")
-
     public ResponseEntity<Report> uploadReport(
-            @RequestParam("patientId") Long patientId,
+            @RequestParam("healthId") String healthId,
             @RequestParam("testId") Long testId,
             @RequestParam("file") MultipartFile file,
             @RequestParam(value="remarks", required=false) String remarks,
@@ -66,7 +66,7 @@ public class AdminController {
                 .orElseThrow(() -> new RuntimeException("Admin not found"));
 
         return ResponseEntity.ok(
-                adminService.uploadReport(patientId, testId, admin.getId(), file, remarks)
+                adminService.uploadReport(healthId, testId, admin.getId(), file, remarks)
         );
     }
 
@@ -113,5 +113,19 @@ public class AdminController {
             @PathVariable Long id,
             @RequestParam User.Status status) {
         return ResponseEntity.ok(adminService.updateDoctorStatus(id, status));
+    }
+
+    @GetMapping("/audit-logs")
+    public ResponseEntity<?> getAuditLogs() {
+        return ResponseEntity.ok(auditLogRepository.findAllByOrderByViewedAtDesc());
+    }
+
+    @PutMapping("/users/{id}/suspend")
+    public ResponseEntity<?> suspendUser(@PathVariable Long id, @RequestParam boolean suspend) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setStatus(suspend ? User.Status.SUSPENDED : User.Status.ACTIVE);
+        userRepository.save(user);
+        return ResponseEntity.ok("User status updated");
     }
 }

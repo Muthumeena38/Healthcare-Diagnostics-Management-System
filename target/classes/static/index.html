@@ -7,7 +7,9 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-
+      
+    <div id="loader"></div>
+    
     <!-- NAVBAR -->
     <nav class="navbar">
         <h1>🏥 DiagnoCare</h1>
@@ -90,6 +92,7 @@
                 <h2>Access Anywhere</h2>
                 <p>Access your health records from any device, anytime. Mobile friendly and easy to use.</p>
             </div>
+      
         </div>
     </div>
 
@@ -126,6 +129,13 @@
         <p style="font-family: 'DM Serif Display', serif; font-size:20px; color:white; margin-bottom:8px;">🏥 DiagnoCare</p>
         <p style="font-size:13px;">© 2026 DiagnoCare. All rights reserved. Your health, our priority.</p>
     </footer>
+
+
+    <script>
+window.addEventListener("load", function () {
+    document.getElementById("loader").style.display = "none";
+});
+</script>
 
 </body>
 </html>
