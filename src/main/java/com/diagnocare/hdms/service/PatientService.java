@@ -61,4 +61,21 @@ public class PatientService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
     }
+
+    public Booking cancelBooking(Long bookingId, String email) {
+        User patient = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        if (!booking.getPatient().getId().equals(patient.getId())) {
+            throw new RuntimeException("Unauthorized");
+        }
+        if (booking.getStatus() == Booking.Status.COMPLETED ||
+                booking.getStatus() == Booking.Status.CANCELLED ||
+                booking.getStatus() == Booking.Status.PAID) {
+            throw new RuntimeException("This booking cannot be cancelled");
+        }
+        booking.setStatus(Booking.Status.CANCELLED);
+        return bookingRepository.save(booking);
+    }
 }

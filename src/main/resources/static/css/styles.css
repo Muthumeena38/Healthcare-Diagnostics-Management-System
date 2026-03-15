@@ -845,3 +845,50 @@ tbody tr:hover   { background: var(--primary-light); }
     .auth-box     { padding: 28px 16px; }
     .action-cell  { flex-direction: column; align-items: flex-start; }
 }
+
+/* DARK MODE */
+body.dark {
+    --bg: #0D1B2A;
+    --white: #1A2B3C;
+    --text-dark: #E8F4FD;
+    --text-mid: #A8C4D8;
+    --text-light: #6A8FA8;
+    --border: #2A3F52;
+    --primary-light: #0A2540;
+}
+
+body.dark .navbar {
+    background: #1A2B3C;
+    border-color: #2A3F52;
+}
+
+body.dark table {
+    background: #1A2B3C;
+}
+
+body.dark .card {
+    background: #1A2B3C;
+}
+
+body.dark .auth-box {
+    background: #1A2B3C;
+}
+
+body.dark .feature-card {
+    background: #1A2B3C;
+}
+
+body.dark .form-group input,
+body.dark .form-group select {
+    background: #0D1B2A;
+    color: #E8F4FD;
+    border-color: #2A3F52;
+}
+
+body.dark .how-it-works {
+    background: #1A2B3C;
+}
+
+body.dark .stats-section {
+    background: #1A2B3C;
+}

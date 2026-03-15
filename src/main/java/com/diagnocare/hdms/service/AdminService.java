@@ -32,6 +32,9 @@ public class AdminService {
     @Autowired
     private ReportRepository reportRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -68,7 +71,17 @@ public class AdminService {
         report.setRemarks(remarks);
         report.setUploadDate(LocalDateTime.now());
 
-        return reportRepository.save(report);
+        Report saved = reportRepository.save(report);
+        try {
+            emailService.sendReportNotification(
+                    patient.getEmail(),
+                    patient.getName(),
+                    test.getTestName()
+            );
+        } catch (Exception e) {
+            System.out.println("Email sending failed: " + e.getMessage());
+        }
+        return saved;
     }
 
 

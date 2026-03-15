@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
+
 import com.diagnocare.hdms.model.User;
 
 @RestController
@@ -59,5 +61,14 @@ public class PatientController {
         return ResponseEntity.ok(
                 patientService.getProfile(email)
         );
+    }
+
+    @PutMapping("/bookings/{id}/cancel")
+    public ResponseEntity<?> cancelBooking(@PathVariable Long id, @RequestParam String email) {
+        try {
+            return ResponseEntity.ok(patientService.cancelBooking(id, email));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
     }
 }

@@ -8,127 +8,159 @@
 </head>
 <body>
     <div class="layout">
-        <div class="sidebar">
-            <h2>🏥 DiagnoCare</h2>
-            <a href="/admin/dashboard.html">📊 Dashboard</a>
-            <a href="/admin/tests.html">🧪 Manage Tests</a>
-            <a href="/admin/reports.html">📋 Manage Reports</a>
-            <a href="/admin/bookings.html">📅 Manage Bookings</a>
-            <a href="/admin/users.html">👥 Manage Users</a>
-            <a href="/admin/verify-doctors.html"> Verify Doctors</a>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
+            <a href="/admin/dashboard.html">Dashboard</a>
+            <a href="/admin/tests.html">Manage Tests</a>
+            <a href="/admin/reports.html">Manage Reports</a>
+            <a href="/admin/bookings.html">Manage Bookings</a>
+            <a href="/admin/users.html">Manage Users</a>
+            <a href="/admin/verify-doctors.html">Verify Doctors</a>
             <a href="/admin/audit-logs.html">Audit Logs</a>
+            <a href="#" onclick="toggleDarkMode()" id="darkModeBtn">🌙 Dark Mode</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
+
         </div>
 
-      <div class="main-content">
-    <h2>👥 Manage Users</h2>
-    <br>
+        <div class="main-content">
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">Manage Users</span>
+            </div>
 
-    <h3>🩺 Doctors</h3>
-    <br>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Specialization</th>
-                <th>License Number</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody id="doctorsTable"></tbody>
-    </table>
+            <h2>Manage Users</h2>
+            <br>
 
-    <br><br>
+            <h3>Doctors</h3>
+            <br>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Specialization</th>
+                            <th>License Number</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctorsTable"></tbody>
+                </table>
+            </div>
 
-    <h3>🧑‍⚕️ Patients</h3>
-    <br>
-    <table>
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Health ID</th>
-            </tr>
-        </thead>
-        <tbody id="patientsTable"></tbody>
-    </table>
-</div>
+            <br><br>
 
-<script>
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    if (!token || role !== 'ADMIN') window.location.href = '/login.html';
+            <h3>Patients</h3>
+            <br>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Health ID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="patientsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
-    const headers = { 'Authorization': 'Bearer ' + token };
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    async function loadUsers() {
-        const users = await fetch('/api/admin/users', { headers }).then(r => r.json());
+    <script>
+        const token = localStorage.getItem('token');
+        const role  = localStorage.getItem('role');
+        if (!token || role !== 'ADMIN') window.location.href = '/login.html';
 
-        const doctors = users.filter(u => u.role === 'DOCTOR');
-        const patients = users.filter(u => u.role === 'PATIENT');
+        const headers = { 'Authorization': 'Bearer ' + token };
 
-        const doctorsTbody = document.getElementById('doctorsTable');
-        doctorsTbody.innerHTML = '';
-        if (doctors.length === 0) {
-            doctorsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No doctors yet</td></tr>';
-        } else {
-            doctors.forEach(u => {
-                doctorsTbody.innerHTML += `
-                    <tr>
-                        <td>${u.name}</td>
-                        <td>${u.email}</td>
-                        <td>${u.phone ? u.phone : 'N/A'}</td>
-                        <td>${u.specialization ? u.specialization : 'N/A'}</td>
-                        <td>${u.licenseNumber ? u.licenseNumber : 'N/A'}</td>
-                        <td>${u.status}</td>
-                    </tr>`;
-            });
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
         }
 
-        const patientsTbody = document.getElementById('patientsTable');
-        patientsTbody.innerHTML = '';
-        if (patients.length === 0) {
-            patientsTbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No patients yet</td></tr>';
-        } else {
-            patients.forEach(u => {
-                patientsTbody.innerHTML += `
-                    <tr>
-                        <td>${u.name}</td>
-                        <td>${u.email}</td>
-                        <td>${u.phone ? u.phone : 'N/A'}</td>
-                    <td>${u.healthId ? u.healthId : 'N/A'}</td>
-                    <td>
-                    <button class="btn" 
-                    style="padding:5px 10px; background:${u.status === 'SUSPENDED' ? 'green' : 'red'};"
-                    onclick="toggleSuspend(${u.id}, ${u.status === 'SUSPENDED'})">
-                    ${u.status === 'SUSPENDED' ? 'Unsuspend' : 'Suspend'}
-                    </button>
-                 </td>`;
-            });
-        }
-    }
+        async function loadUsers() {
+            const users    = await fetch('/api/admin/users', { headers }).then(r => r.json());
+            const doctors  = users.filter(u => u.role === 'DOCTOR');
+            const patients = users.filter(u => u.role === 'PATIENT');
 
-    async function toggleSuspend(userId, isSuspended) {
-    const confirm = window.confirm(isSuspended ? 'Unsuspend this user?' : 'Suspend this user?');
-    if (!confirm) return;
-    await fetch('/api/admin/users/' + userId + '/suspend?suspend=' + !isSuspended, {
-        method: 'PUT',
-        headers
-    });
-    loadUsers();
+            const doctorsTbody = document.getElementById('doctorsTable');
+            doctorsTbody.innerHTML = '';
+            if (doctors.length === 0) {
+                doctorsTbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No doctors yet</td></tr>';
+            } else {
+                doctors.forEach(u => {
+                    doctorsTbody.innerHTML += `
+                        <tr>
+                            <td>${u.name}</td>
+                            <td>${u.email}</td>
+                            <td>${u.phone || 'N/A'}</td>
+                            <td>${u.specialization || 'N/A'}</td>
+                            <td>${u.licenseNumber || 'N/A'}</td>
+                            <td>${u.status}</td>
+                        </tr>`;
+                });
+            }
+
+            const patientsTbody = document.getElementById('patientsTable');
+            patientsTbody.innerHTML = '';
+            if (patients.length === 0) {
+                patientsTbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No patients yet</td></tr>';
+            } else {
+                patients.forEach(u => {
+                    const isSuspended = u.status === 'SUSPENDED';
+                    patientsTbody.innerHTML += `
+                        <tr>
+                            <td>${u.name}</td>
+                            <td>${u.email}</td>
+                            <td>${u.phone || 'N/A'}</td>
+                            <td>${u.healthId || 'N/A'}</td>
+                            <td>
+                                <button class="btn btn-sm ${isSuspended ? 'btn-success' : 'btn-danger'}"
+                                    onclick="toggleSuspend(${u.id}, ${isSuspended})">
+                                    ${isSuspended ? 'Unsuspend' : 'Suspend'}
+                                </button>
+                            </td>
+                        </tr>`;
+                });
+            }
+        }
+
+        async function toggleSuspend(userId, isSuspended) {
+            if (!window.confirm(isSuspended ? 'Unsuspend this user?' : 'Suspend this user?')) return;
+            await fetch('/api/admin/users/' + userId + '/suspend?suspend=' + !isSuspended, {
+                method: 'PUT', headers
+            });
+            loadUsers();
+        }
+
+        function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    localStorage.setItem('darkMode', isDark);
+    document.getElementById('darkModeBtn').innerText = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
 }
 
+if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark');
+    document.getElementById('darkModeBtn').innerText = '☀️ Light Mode';
+}
 
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
 
-    function logout() {
-        localStorage.clear();
-        window.location.href = '/login.html';
-    }
-
-    loadUsers();
-</script>
+        loadUsers();
+    </script>
 </body>
 </html>

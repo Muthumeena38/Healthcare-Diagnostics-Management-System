@@ -34,7 +34,5 @@ public class Booking {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public enum Status {
-        BOOKED, COMPLETED
-    }
+    public enum Status { PENDING, CONFIRMED, COMPLETED, BOOKED, CANCELLED, PAID }
 }
