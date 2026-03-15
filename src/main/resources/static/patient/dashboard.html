@@ -8,18 +8,26 @@
 </head>
 <body>
     <div class="layout">
-        <div class="sidebar">
-            <h2> DiagnoCare</h2>
-           <p id="patientName"></p>
-           <p id="healthId" style="font-size:12px; color: var(--accent); padding: 4px 24px; font-weight:600;"></p>
-            <br>
-            <a href="/patient/dashboard.html"> Dashboard</a>
-            <a href="/patient/book-test.html"> Book a Test</a>
-            <a href="/patient/my-reports.html"> My Reports</a>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
+            <p id="patientName"></p>
+            <p id="healthId" class="sidebar-health-id"></p>
+            <a href="/patient/dashboard.html">Dashboard</a>
+            <a href="/patient/book-test.html">Book a Test</a>
+            <a href="/patient/my-reports.html">My Reports</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
 
         <div class="main-content">
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">Patient Dashboard</span>
+            </div>
+
             <h2>Welcome to Patient Dashboard</h2>
             <br>
             <div class="cards">
@@ -35,52 +43,53 @@
 
             <h3>My Recent Bookings</h3>
             <br>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Test Name</th>
-                        <th>Booking Date</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="bookingsTable">
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Test Name</th>
+                            <th>Booking Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <script>
-       const token = localStorage.getItem('token');
-       const role = localStorage.getItem('role');
-       const name = localStorage.getItem('name');
-       const userEmail = localStorage.getItem('userEmail') || '';
-       const headers = { 'Authorization': 'Bearer ' + token };
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-        if (!token || role !== 'PATIENT') {
-            window.location.href = '/login.html';
-        }
+    <script>
+        const token     = localStorage.getItem('token');
+        const role      = localStorage.getItem('role');
+        const name      = localStorage.getItem('name');
+        const userEmail = localStorage.getItem('userEmail') || '';
+        const headers   = { 'Authorization': 'Bearer ' + token };
+
+        if (!token || role !== 'PATIENT') window.location.href = '/login.html';
 
         document.getElementById('patientName').innerText = 'Hello, ' + name;
 
-        // const userEmail = localStorage.getItem('userEmail');
-        fetch('/api/patient/profile?email=' + userEmail, { headers })
-       .then(r => r.json())
-       .then(user => {
-        if (user.healthId) {
-            document.getElementById('healthId').innerText = '🪪 Health ID: ' + user.healthId;
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
         }
-    });
 
-        // const headers = { 'Authorization': 'Bearer ' + token };
+        fetch('/api/patient/profile?email=' + userEmail, { headers })
+            .then(r => r.json())
+            .then(user => {
+                if (user.healthId) {
+                    document.getElementById('healthId').innerText = '🪪 Health ID: ' + user.healthId;
+                }
+            });
 
         async function loadDashboard() {
-            // const userEmail = localStorage.getItem('userEmail');
-
             const bookings = await fetch('/api/patient/bookings?email=' + userEmail, { headers }).then(r => r.json());
-            const reports = await fetch('/api/patient/reports?email=' + userEmail, { headers }).then(r => r.json());
+            const reports  = await fetch('/api/patient/reports?email='  + userEmail, { headers }).then(r => r.json());
 
             document.getElementById('totalBookings').innerText = bookings.length;
-            document.getElementById('totalReports').innerText = reports.length;
+            document.getElementById('totalReports').innerText  = reports.length;
 
             const tbody = document.getElementById('bookingsTable');
             tbody.innerHTML = '';
@@ -90,8 +99,7 @@
                         <td>${booking.test.testName}</td>
                         <td>${booking.bookingDate}</td>
                         <td>${booking.status}</td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 

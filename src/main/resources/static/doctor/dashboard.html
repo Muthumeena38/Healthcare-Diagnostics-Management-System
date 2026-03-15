@@ -8,16 +8,24 @@
 </head>
 <body>
     <div class="layout">
-        <div class="sidebar">
-            <h2> DiagnoCare</h2>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
             <p id="doctorName"></p>
-            <br>
-            <a href="/doctor/dashboard.html"> Dashboard</a>
-            <a href="/doctor/view-reports.html"> View Reports</a>
+            <a href="/doctor/dashboard.html">Dashboard</a>
+            <a href="/doctor/view-reports.html">View Reports</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
 
         <div class="main-content">
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">Doctor Dashboard</span>
+            </div>
+
             <h2>Welcome to Doctor Dashboard</h2>
             <br>
             <div class="cards">
@@ -33,41 +41,45 @@
 
             <h3>Recent Reports</h3>
             <br>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Patient</th>
-                        <th>Test</th>
-                        <th>Upload Date</th>
-                        <th>Remark Status</th>
-                    </tr>
-                </thead>
-                <tbody id="reportsTable">
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Test</th>
+                            <th>Upload Date</th>
+                            <th>Remark Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
     <script>
         const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-        const name = localStorage.getItem('name');
+        const role  = localStorage.getItem('role');
+        const name  = localStorage.getItem('name');
 
-        if (!token || role !== 'DOCTOR') {
-            window.location.href = '/login.html';
-        }
+        if (!token || role !== 'DOCTOR') window.location.href = '/login.html';
 
         document.getElementById('doctorName').innerText = 'Hello, Dr. ' + name;
 
         const headers = { 'Authorization': 'Bearer ' + token };
 
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
+        }
+
         async function loadDashboard() {
             const reports = await fetch('/api/doctor/reports', { headers }).then(r => r.json());
 
-            document.getElementById('totalReports').innerText = reports.length;
-
-            const remarked = reports.filter(r => r.doctorRemark !== null).length;
-            document.getElementById('remarkedReports').innerText = remarked;
+            document.getElementById('totalReports').innerText    = reports.length;
+            document.getElementById('remarkedReports').innerText = reports.filter(r => r.doctorRemark !== null).length;
 
             const tbody = document.getElementById('reportsTable');
             tbody.innerHTML = '';
@@ -76,10 +88,9 @@
                     <tr>
                         <td>${report.patient.name}</td>
                         <td>${report.test.testName}</td>
-                        <td>${report.uploadDate ? report.uploadDate : 'N/A'}</td>
+                        <td>${report.uploadDate || 'N/A'}</td>
                         <td>${report.doctorRemark ? '✅ Remarked' : '⏳ Pending'}</td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 

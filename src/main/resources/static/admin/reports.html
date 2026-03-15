@@ -8,31 +8,40 @@
 </head>
 <body>
     <div class="layout">
-        <div class="sidebar">
-            <h2> DiagnoCare</h2>
-            <a href="/admin/dashboard.html"> Dashboard</a>
-            <a href="/admin/tests.html"> Manage Tests</a>
-            <a href="/admin/reports.html"> Manage Reports</a>
-            <a href="/admin/bookings.html"> Manage Bookings</a>
-            <a href="/admin/users.html"> Manage Users</a>
-            <a href="/admin/verify-doctors.html"> Verify Doctors</a>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
+            <a href="/admin/dashboard.html">Dashboard</a>
+            <a href="/admin/tests.html">Manage Tests</a>
+            <a href="/admin/reports.html">Manage Reports</a>
+            <a href="/admin/bookings.html">Manage Bookings</a>
+            <a href="/admin/users.html">Manage Users</a>
+            <a href="/admin/verify-doctors.html">Verify Doctors</a>
             <a href="/admin/audit-logs.html">Audit Logs</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
 
         <div class="main-content">
-            <h2> Manage Reports</h2>
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">Manage Reports</span>
+            </div>
+
+            <h2>Manage Reports</h2>
             <br>
 
             <!-- Upload Report Form -->
-            <div class="auth-box" style="text-align:left; margin-bottom:30px;">
+            <div class="form-card">
                 <h3>Upload Report</h3>
                 <br>
-               <div class="form-group">
-               <label>Health ID</label>
-               <input type="text" id="healthId" placeholder="e.g. DC-2026-00001" maxlength="14"
-               oninput="this.value = this.value.toUpperCase()">
-            </div>
+                <div class="form-group">
+                    <label>Health ID</label>
+                    <input type="text" id="healthId" placeholder="e.g. DC-2026-00001" maxlength="14"
+                        oninput="this.value = this.value.toUpperCase()">
+                </div>
                 <div class="form-group">
                     <label>Test ID</label>
                     <input type="number" id="testId" placeholder="Enter test ID">
@@ -50,35 +59,38 @@
             </div>
 
             <!-- Reports Table -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Patient</th>
-                        <th>Test</th>
-                        <th>Uploaded By</th>
-                        <th>Date</th>
-                        <th>Remarks</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="reportsTable">
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient</th>
+                            <th>Test</th>
+                            <th>Uploaded By</th>
+                            <th>Date</th>
+                            <th>Remarks</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
     <script>
         const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
+        const role  = localStorage.getItem('role');
+        if (!token || role !== 'ADMIN') window.location.href = '/login.html';
 
-        if (!token || role !== 'ADMIN') {
-            window.location.href = '/login.html';
+        const headers = { 'Authorization': 'Bearer ' + token };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
         }
-
-        const headers = {
-            'Authorization': 'Bearer ' + token
-        };
 
         async function loadReports() {
             const reports = await fetch('/api/admin/reports', { headers }).then(r => r.json());
@@ -91,27 +103,27 @@
                         <td>${report.patient.name}</td>
                         <td>${report.test.testName}</td>
                         <td>${report.uploadedBy.name}</td>
-                        <td>${report.uploadDate ? report.uploadDate : 'N/A'}</td>
-                        <td>${report.remarks ? report.remarks : 'N/A'}</td>
-                      <td>
-                      <a href="/api/admin/reports/${report.id}/view" target="_blank" 
-                     class="btn" style="padding:5px 10px; margin-right:5px;">View PDF</a>
-                      <button class="btn" style="background:red; padding:5px 10px;"
-                    onclick="deleteReport(${report.id})">Delete</button>
-                     </td>
-                    </tr>
-                `;
+                        <td>${report.uploadDate || 'N/A'}</td>
+                        <td>${report.remarks || 'N/A'}</td>
+                        <td class="action-cell">
+                            <a href="/api/admin/reports/${report.id}/view" target="_blank"
+                                class="btn btn-sm">View PDF</a>
+                            <button class="btn btn-sm btn-danger"
+                                onclick="deleteReport(${report.id})">Delete</button>
+                        </td>
+                    </tr>`;
             });
         }
 
         async function uploadReport() {
-           const healthId = document.getElementById('healthId').value.trim();
-          const pattern = /^DC-\d{4}-\d{5}$/;
-          if (!healthId) { alert('Please enter Health ID'); return; }
-          if (!pattern.test(healthId)) { alert('Invalid format! Use DC-YYYY-NNNNN (e.g. DC-2026-00001)'); return; }
-            const testId = document.getElementById('testId').value;
+            const healthId = document.getElementById('healthId').value.trim();
+            const pattern  = /^DC-\d{4}-\d{5}$/;
+            if (!healthId)             { alert('Please enter Health ID'); return; }
+            if (!pattern.test(healthId)) { alert('Invalid format! Use DC-YYYY-NNNNN (e.g. DC-2026-00001)'); return; }
+
+            const testId  = document.getElementById('testId').value;
             const remarks = document.getElementById('remarks').value;
-            const file = document.getElementById('reportFile').files[0];
+            const file    = document.getElementById('reportFile').files[0];
 
             const formData = new FormData();
             formData.append('healthId', healthId);
@@ -132,10 +144,7 @@
         }
 
         async function deleteReport(id) {
-            await fetch('/api/admin/reports/' + id, {
-                method: 'DELETE',
-                headers
-            });
+            await fetch('/api/admin/reports/' + id, { method: 'DELETE', headers });
             loadReports();
         }
 

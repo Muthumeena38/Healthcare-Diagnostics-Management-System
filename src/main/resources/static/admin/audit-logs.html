@@ -2,65 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audit Logs</title>
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-<div class="layout">
-    <div class="sidebar">
-        <h2>DiagnoCare</h2>
-        <a href="/admin/dashboard.html">Dashboard</a>
-        <a href="/admin/reports.html">Reports</a>
-        <a href="/admin/verify-doctors.html">Verify Doctors</a>
-        <a href="/admin/audit-logs.html">Audit Logs</a>
-        <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
-    </div>
-    <div class="main-content">
-        <h2>Doctor Audit Logs</h2>
-        <br>
-        <table>
-            <thead>
-                <tr>
-                    <th>Doctor</th>
-                    <th>Patient</th>
-                    <th>Health ID</th>
-                    <th>Viewed At</th>
-                </tr>
-            </thead>
-            <tbody id="logsTable"></tbody>
-        </table>
-    </div>
-</div>
-<script>
-    const token = localStorage.getItem('token');
-    const role = localStorage.getItem('role');
-    if (!token || role !== 'ADMIN') window.location.href = '/login.html';
+    <div class="layout">
 
-    const headers = { 'Authorization': 'Bearer ' + token };
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
+            <a href="/admin/dashboard.html">Dashboard</a>
+            <a href="/admin/reports.html">Reports</a>
+            <a href="/admin/verify-doctors.html">Verify Doctors</a>
+            <a href="/admin/audit-logs.html">Audit Logs</a>
+            <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
+        </div>
 
-    fetch('/api/admin/audit-logs', { headers })
-        .then(r => r.json())
-        .then(logs => {
-            const tbody = document.getElementById('logsTable');
-            if (logs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No logs yet</td></tr>';
-                return;
-            }
-            logs.forEach(log => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${log.doctor.name}</td>
-                        <td>${log.patient.name}</td>
-                        <td>${log.patient.healthId}</td>
-                        <td>${log.viewedAt}</td>
-                    </tr>`;
+        <div class="main-content">
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">Audit Logs</span>
+            </div>
+
+            <h2>Doctor Audit Logs</h2>
+            <br>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Patient</th>
+                            <th>Health ID</th>
+                            <th>Viewed At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const role  = localStorage.getItem('role');
+        if (!token || role !== 'ADMIN') window.location.href = '/login.html';
+
+        const headers = { 'Authorization': 'Bearer ' + token };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
+        }
+
+        fetch('/api/admin/audit-logs', { headers })
+            .then(r => r.json())
+            .then(logs => {
+                const tbody = document.getElementById('logsTable');
+                if (logs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No logs yet</td></tr>';
+                    return;
+                }
+                logs.forEach(log => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${log.doctor.name}</td>
+                            <td>${log.patient.name}</td>
+                            <td>${log.patient.healthId}</td>
+                            <td>${log.viewedAt}</td>
+                        </tr>`;
+                });
             });
-        });
 
-    function logout() {
-        localStorage.clear();
-        window.location.href = '/login.html';
-    }
-</script>
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/login.html';
+        }
+    </script>
 </body>
 </html>

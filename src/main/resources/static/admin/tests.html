@@ -8,24 +8,33 @@
 </head>
 <body>
     <div class="layout">
-        <div class="sidebar">
-            <h2> DiagnoCare</h2>
-            <a href="/admin/dashboard.html"> Dashboard</a>
-            <a href="/admin/tests.html"> Manage Tests</a>
-            <a href="/admin/reports.html"> Manage Reports</a>
-            <a href="/admin/bookings.html"> Manage Bookings</a>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
+            <a href="/admin/dashboard.html">Dashboard</a>
+            <a href="/admin/tests.html">Manage Tests</a>
+            <a href="/admin/reports.html">Manage Reports</a>
+            <a href="/admin/bookings.html">Manage Bookings</a>
             <a href="/admin/users.html">Manage Users</a>
-            <a href="/admin/verify-doctors.html"> Verify Doctors</a>
+            <a href="/admin/verify-doctors.html">Verify Doctors</a>
             <a href="/admin/audit-logs.html">Audit Logs</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
 
         <div class="main-content">
-            <h2> Manage Tests</h2>
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">Manage Tests</span>
+            </div>
+
+            <h2>Manage Tests</h2>
             <br>
 
             <!-- Add Test Form -->
-            <div class="auth-box" style="text-align:left; margin-bottom:30px;">
+            <div class="form-card">
                 <h3>Add New Test</h3>
                 <br>
                 <div class="form-group">
@@ -48,35 +57,40 @@
             </div>
 
             <!-- Tests Table -->
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Test Name</th>
-                        <th>Price</th>
-                        <th>Category</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="testsTable">
-                </tbody>
-            </table>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Test Name</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testsTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
     <script>
         const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-
-        if (!token || role !== 'ADMIN') {
-            window.location.href = '/login.html';
-        }
+        const role  = localStorage.getItem('role');
+        if (!token || role !== 'ADMIN') window.location.href = '/login.html';
 
         const headers = {
             'Authorization': 'Bearer ' + token,
             'Content-Type': 'application/json'
         };
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
+        }
 
         async function loadTests() {
             const tests = await fetch('/api/admin/tests', { headers }).then(r => r.json());
@@ -91,18 +105,17 @@
                         <td>${test.category}</td>
                         <td>${test.isActive ? 'Active' : 'Inactive'}</td>
                         <td>
-                            <button class="btn" style="background:red; padding:5px 10px;"
+                            <button class="btn btn-sm btn-danger"
                                 onclick="deleteTest(${test.id})">Delete</button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 
         async function addTest() {
-            const testName = document.getElementById('testName').value;
-            const price = document.getElementById('price').value;
-            const category = document.getElementById('category').value;
+            const testName   = document.getElementById('testName').value;
+            const price      = document.getElementById('price').value;
+            const category   = document.getElementById('category').value;
             const description = document.getElementById('description').value;
 
             await fetch('/api/admin/tests', {
@@ -110,7 +123,6 @@
                 headers,
                 body: JSON.stringify({ testName, price, category, description, isActive: true })
             });
-
             loadTests();
         }
 

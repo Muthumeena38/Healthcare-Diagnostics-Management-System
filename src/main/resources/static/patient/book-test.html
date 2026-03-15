@@ -8,28 +8,36 @@
 </head>
 <body>
     <div class="layout">
-        <div class="sidebar">
-            <h2> DiagnoCare</h2>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
             <p id="patientName"></p>
-            <br>
-            <a href="/patient/dashboard.html"> Dashboard</a>
-            <a href="/patient/book-test.html"> Book a Test</a>
-            <a href="/patient/my-reports.html"> My Reports</a>
+            <a href="/patient/dashboard.html">Dashboard</a>
+            <a href="/patient/book-test.html">Book a Test</a>
+            <a href="/patient/my-reports.html">My Reports</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
 
         <div class="main-content">
-            <h2> Book a Test</h2>
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">Book a Test</span>
+            </div>
+
+            <h2>Book a Test</h2>
             <br>
 
             <div id="success-msg" class="success-msg"></div>
-            <div id="error-msg" class="error-msg"></div>
+            <div id="error-msg"   class="error-msg"></div>
 
-            <div class="cards" id="testsContainer">
-            </div>
+            <!-- Test cards grid -->
+            <div class="cards" id="testsContainer"></div>
 
             <!-- Booking Form -->
-            <div class="auth-box" style="text-align:left; margin-top:30px;">
+            <div class="form-card" style="margin-top:24px;">
                 <h3>Confirm Booking</h3>
                 <br>
                 <div class="form-group">
@@ -50,55 +58,53 @@
         </div>
     </div>
 
-    <script>
-        const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-        const name = localStorage.getItem('name');
-        const userEmail = localStorage.getItem('userEmail');
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-        if (!token || role !== 'PATIENT') {
-            window.location.href = '/login.html';
-        }
+    <script>
+        const token     = localStorage.getItem('token');
+        const role      = localStorage.getItem('role');
+        const name      = localStorage.getItem('name');
+        const userEmail = localStorage.getItem('userEmail');
+        const headers   = { 'Authorization': 'Bearer ' + token };
+
+        if (!token || role !== 'PATIENT') window.location.href = '/login.html';
 
         document.getElementById('patientName').innerText = 'Hello, ' + name;
 
-        const headers = { 'Authorization': 'Bearer ' + token };
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
+        }
 
         async function loadTests() {
-            const tests = await fetch('/api/patient/tests', { headers }).then(r => r.json());
+            const tests     = await fetch('/api/patient/tests', { headers }).then(r => r.json());
             const container = document.getElementById('testsContainer');
             container.innerHTML = '';
             tests.forEach(test => {
                 container.innerHTML += `
-                    <div class="card" style="cursor:pointer" onclick="selectTest(${test.id}, '${test.testName}')">
+                    <div class="card test-card" onclick="selectTest(${test.id}, '${test.testName}')">
                         <h3>₹${test.price}</h3>
                         <p><strong>${test.testName}</strong></p>
                         <p>${test.category}</p>
-                        <p style="font-size:12px">${test.description}</p>
-                    </div>
-                `;
+                        <p class="test-desc">${test.description}</p>
+                    </div>`;
             });
         }
 
-        function selectTest(id, name) {
+        function selectTest(id, testName) {
             document.getElementById('selectedTestId').value = id;
-            document.getElementById('selectedTest').value = name;
+            document.getElementById('selectedTest').value   = testName;
+            document.querySelectorAll('.test-card').forEach(c => c.classList.remove('test-card-selected'));
+            event.currentTarget.classList.add('test-card-selected');
         }
 
         async function bookTest() {
-            const testId = document.getElementById('selectedTestId').value;
+            const testId      = document.getElementById('selectedTestId').value;
             const bookingDate = document.getElementById('bookingDate').value;
-            const notes = document.getElementById('notes').value;
+            const notes       = document.getElementById('notes').value;
 
-            if (!testId) {
-                document.getElementById('error-msg').innerText = 'Please select a test!';
-                return;
-            }
-
-            if (!bookingDate) {
-                document.getElementById('error-msg').innerText = 'Please select a date!';
-                return;
-            }
+            if (!testId)      { document.getElementById('error-msg').innerText = 'Please select a test!'; return; }
+            if (!bookingDate) { document.getElementById('error-msg').innerText = 'Please select a date!'; return; }
 
             const response = await fetch('/api/patient/book-test/' + testId + '?email=' + userEmail, {
                 method: 'POST',
@@ -108,10 +114,8 @@
 
             if (response.ok) {
                 document.getElementById('success-msg').innerText = 'Test booked successfully!';
-                document.getElementById('error-msg').innerText = '';
-                setTimeout(() => {
-                    window.location.href = '/patient/dashboard.html';
-                }, 1500);
+                document.getElementById('error-msg').innerText   = '';
+                setTimeout(() => window.location.href = '/patient/dashboard.html', 1500);
             } else {
                 document.getElementById('error-msg').innerText = 'Booking failed!';
             }

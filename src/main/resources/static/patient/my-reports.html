@@ -8,59 +8,71 @@
 </head>
 <body>
     <div class="layout">
-        <div class="sidebar">
-            <h2> DiagnoCare</h2>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
             <p id="patientName"></p>
-            <br>
-            <a href="/patient/dashboard.html"> Dashboard</a>
-            <a href="/patient/book-test.html"> Book a Test</a>
-            <a href="/patient/my-reports.html"> My Reports</a>
+            <a href="/patient/dashboard.html">Dashboard</a>
+            <a href="/patient/book-test.html">Book a Test</a>
+            <a href="/patient/my-reports.html">My Reports</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
 
         <div class="main-content">
-            <h2> My Reports</h2>
-            <br>
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">My Reports</span>
+            </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Test Name</th>
-                        <th>Upload Date</th>
-                        <th>Remarks</th>
-                        <th>Doctor</th>
-                        <th>Doctor Remark</th>
-                        <th>Report</th>
-                    </tr>
-                </thead>
-                <tbody id="reportsTable">
-                </tbody>
-            </table>
+            <h2>My Reports</h2>
+            <br>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Test Name</th>
+                            <th>Upload Date</th>
+                            <th>Remarks</th>
+                            <th>Doctor</th>
+                            <th>Doctor Remark</th>
+                            <th>Report</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <script>
-        const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-        const name = localStorage.getItem('name');
-        const userEmail = localStorage.getItem('userEmail');
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-        if (!token || role !== 'PATIENT') {
-            window.location.href = '/login.html';
-        }
+    <script>
+        const token     = localStorage.getItem('token');
+        const role      = localStorage.getItem('role');
+        const name      = localStorage.getItem('name');
+        const userEmail = localStorage.getItem('userEmail');
+        const headers   = { 'Authorization': 'Bearer ' + token };
+
+        if (!token || role !== 'PATIENT') window.location.href = '/login.html';
 
         document.getElementById('patientName').innerText = 'Hello, ' + name;
 
-        const headers = { 'Authorization': 'Bearer ' + token };
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
+        }
 
         async function loadReports() {
             const reports = await fetch('/api/patient/reports?email=' + userEmail, { headers }).then(r => r.json());
-            const tbody = document.getElementById('reportsTable');
+            const tbody   = document.getElementById('reportsTable');
             tbody.innerHTML = '';
 
             if (reports.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center">No reports found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">No reports found</td></tr>';
                 return;
             }
 
@@ -69,16 +81,15 @@
                     <tr>
                         <td>${report.id}</td>
                         <td>${report.test.testName}</td>
-                        <td>${report.uploadDate ? report.uploadDate : 'N/A'}</td>
-                        <td>${report.remarks ? report.remarks : 'N/A'}</td>
+                        <td>${report.uploadDate    || 'N/A'}</td>
+                        <td>${report.remarks       || 'N/A'}</td>
                         <td>${report.doctor ? report.doctor.name : 'Not assigned'}</td>
-                      <td>${report.doctorRemark ? report.doctorRemark : 'No remark yet'}</td>
-                     <td>
-                      <a href="/api/admin/reports/${report.id}/view" target="_blank"
-                      class="btn" style="padding:5px 10px;">View PDF</a>
-                      </td>
-                    </tr>
-                `;
+                        <td>${report.doctorRemark  || 'No remark yet'}</td>
+                        <td>
+                            <a href="/api/admin/reports/${report.id}/view" target="_blank"
+                                class="btn btn-sm">View PDF</a>
+                        </td>
+                    </tr>`;
             });
         }
 

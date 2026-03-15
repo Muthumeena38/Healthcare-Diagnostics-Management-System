@@ -8,86 +8,106 @@
 </head>
 <body>
     <div class="layout">
-        <div class="sidebar">
-            <h2>DiagnoCare</h2>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>DiagnoCare</h2>
+                <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+            </div>
             <p id="doctorName"></p>
-            <br>
             <a href="/doctor/dashboard.html">Dashboard</a>
             <a href="/doctor/view-reports.html">View Reports</a>
             <a href="#" onclick="logout()" class="btn logout-btn">Logout</a>
         </div>
+
         <div class="main-content">
+            <div class="mobile-topbar">
+                <button class="hamburger" onclick="toggleSidebar()">☰</button>
+                <span class="mobile-title">View Reports</span>
+            </div>
+
             <h2>View Patient Reports</h2>
             <br>
-            <div class="auth-box" style="text-align:left; margin-bottom:20px;">
-                <h3>Search Patient by HEALTH-ID</h3>
+
+            <div class="form-card">
+                <h3>Search Patient by Health ID</h3>
                 <br>
                 <div class="form-group">
-                   <label>Health ID</label>
-                   <input type="text" id="healthId" placeholder="e.g. DC-2026-00001" 
-                   pattern="DC-\d{4}-\d{5}" maxlength="14"
-                   oninput="this.value = this.value.toUpperCase()"
-                   style="text-transform:uppercase;">
+                    <label>Health ID</label>
+                    <input type="text" id="healthId" placeholder="e.g. DC-2026-00001"
+                        pattern="DC-\d{4}-\d{5}" maxlength="14"
+                        oninput="this.value = this.value.toUpperCase()">
                 </div>
                 <button class="btn" onclick="searchPatient()">Search</button>
             </div>
+
             <div id="success-msg" class="success-msg"></div>
-            <div id="error-msg" class="error-msg"></div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Patient</th>
-                        <th>Test</th>
-                        <th>Upload Date</th>
-                        <th>Remarks</th>
-                        <th>Doctor Remark</th>
-                        <th>Report</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="reportsTable"></tbody>
-            </table>
+            <div id="error-msg"   class="error-msg"></div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient</th>
+                            <th>Test</th>
+                            <th>Upload Date</th>
+                            <th>Remarks</th>
+                            <th>Doctor Remark</th>
+                            <th>Report</th>
+                            <th>Add Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTable"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
+    <div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
     <script>
-        const token = localStorage.getItem('token');
-        const role = localStorage.getItem('role');
-        const name = localStorage.getItem('name');
+        const token     = localStorage.getItem('token');
+        const role      = localStorage.getItem('role');
+        const name      = localStorage.getItem('name');
         const userEmail = localStorage.getItem('userEmail');
 
-        if (!token || role !== 'DOCTOR') {
-            window.location.href = '/login.html';
-        }
+        if (!token || role !== 'DOCTOR') window.location.href = '/login.html';
 
         document.getElementById('doctorName').innerText = 'Hello, Dr. ' + name;
 
         const headers = { 'Authorization': 'Bearer ' + token };
 
-        async function searchPatient() {
-          const healthId = document.getElementById('healthId').value.trim().toUpperCase();
-          const pattern = /^DC-\d{4}-\d{5}$/;
-          if (!healthId) {
-          document.getElementById('error-msg').innerText = 'Please enter Health ID!';
-          return;
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('sidebar-open');
+            document.getElementById('overlay').classList.toggle('overlay-show');
         }
-    if (!pattern.test(healthId)) {
-        document.getElementById('error-msg').innerText = 'Invalid format! Use DC-YYYY-NNNNN (e.g. DC-2026-00001)';
-        return;
-    }
 
-    const response = await fetch('/api/doctor/patient/' + healthId + '/reports?email=' + userEmail, { headers });
+        async function searchPatient() {
+            const healthId = document.getElementById('healthId').value.trim().toUpperCase();
+            const pattern  = /^DC-\d{4}-\d{5}$/;
 
+            document.getElementById('error-msg').innerText   = '';
+            document.getElementById('success-msg').innerText = '';
+
+            if (!healthId) {
+                document.getElementById('error-msg').innerText = 'Please enter Health ID!';
+                return;
+            }
+            if (!pattern.test(healthId)) {
+                document.getElementById('error-msg').innerText = 'Invalid format! Use DC-YYYY-NNNNN (e.g. DC-2026-00001)';
+                return;
+            }
+
+            const response = await fetch('/api/doctor/patient/' + healthId + '/reports?email=' + userEmail, { headers });
             if (!response.ok) {
                 document.getElementById('error-msg').innerText = 'Patient not found!';
                 return;
             }
 
             const reports = await response.json();
-            const tbody = document.getElementById('reportsTable');
+            const tbody   = document.getElementById('reportsTable');
             tbody.innerHTML = '';
-            document.getElementById('error-msg').innerText = '';
 
             if (reports.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="8" style="text-align:center">No reports found for this patient</td></tr>';
@@ -100,31 +120,26 @@
                         <td>${report.id}</td>
                         <td>${report.patient.name}</td>
                         <td>${report.test.testName}</td>
-                        <td>${report.uploadDate ? report.uploadDate : 'N/A'}</td>
-                        <td>${report.remarks ? report.remarks : 'N/A'}</td>
-                        <td>${report.doctorRemark ? report.doctorRemark : 'No remark yet'}</td>
+                        <td>${report.uploadDate || 'N/A'}</td>
+                        <td>${report.remarks    || 'N/A'}</td>
+                        <td>${report.doctorRemark || 'No remark yet'}</td>
                         <td>
                             <a href="/api/admin/reports/${report.id}/view" target="_blank"
-                                class="btn" style="padding:5px 10px;">View PDF</a>
+                                class="btn btn-sm">View PDF</a>
                         </td>
-                        <td>
+                        <td class="remark-cell">
                             <input type="text" id="remark-${report.id}"
-                                placeholder="Add remark"
-                                style="padding:5px; border:1px solid #ddd; border-radius:5px;">
-                            <button class="btn" style="padding:5px 10px; margin-top:5px;"
+                                placeholder="Add remark" class="remark-input">
+                            <button class="btn btn-sm"
                                 onclick="addRemark(${report.id})">Save</button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         }
 
         async function addRemark(reportId) {
             const remark = document.getElementById('remark-' + reportId).value;
-            if (!remark) {
-                alert('Please enter a remark!');
-                return;
-            }
+            if (!remark) { alert('Please enter a remark!'); return; }
 
             const response = await fetch(
                 '/api/doctor/reports/' + reportId + '/remark?remark=' + remark + '&email=' + userEmail,
