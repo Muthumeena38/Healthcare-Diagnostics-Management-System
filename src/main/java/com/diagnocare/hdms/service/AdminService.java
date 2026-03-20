@@ -35,6 +35,9 @@ public class AdminService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private AiService aiService;
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -80,6 +83,11 @@ public class AdminService {
             );
         } catch (Exception e) {
             System.out.println("Email sending failed: " + e.getMessage());
+        }
+        try {
+            aiService.storeReportChunks(saved);
+        } catch (Exception e) {
+            System.out.println("Chunk storage failed: " + e.getMessage());
         }
         return saved;
     }
