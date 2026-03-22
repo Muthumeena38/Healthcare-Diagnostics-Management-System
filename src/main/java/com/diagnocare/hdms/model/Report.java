@@ -34,7 +34,7 @@ public class Report {
 
     @JsonIgnore
     @Lob
-    @Column(name = "file_content", columnDefinition = "LONGBLOB")
+    @Column(name = "file_content", columnDefinition = "bytea")
     private byte[] fileContent;
 
     @ManyToOne
