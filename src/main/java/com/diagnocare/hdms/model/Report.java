@@ -33,9 +33,13 @@ public class Report {
     private String fileName;
 
     @JsonIgnore
-    @Lob
     @Column(name = "file_content", columnDefinition = "bytea")
     private byte[] fileContent;
+//    private String fileName;
+
+
+//    private String filePath;
+
 
     @ManyToOne
     @JoinColumn(name = "uploaded_by", nullable = false)

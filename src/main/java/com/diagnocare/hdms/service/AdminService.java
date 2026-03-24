@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.diagnocare.hdms.model.User;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -73,6 +74,21 @@ public class AdminService {
         report.setFileContent(file.getBytes());
         report.setRemarks(remarks);
         report.setUploadDate(LocalDateTime.now());
+
+//        String uploadDir = System.getProperty("user.home") + File.separator + "hdms_uploads";
+//
+//        File folder = new File(uploadDir);
+//        if (!folder.exists()) {
+//            folder.mkdirs();
+//        }
+//
+//        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+//
+//        File savedFile = new File(folder, fileName);
+//        file.transferTo(savedFile);
+//
+//// save file name in DB
+//        report.setFileName(fileName);
 
         Report saved = reportRepository.save(report);
         try {
