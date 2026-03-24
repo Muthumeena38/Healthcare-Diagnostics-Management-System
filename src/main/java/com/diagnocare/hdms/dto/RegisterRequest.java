@@ -11,4 +11,5 @@ public class RegisterRequest {
     private User.Role role;
     private String licenseNumber;
     private String specialization;
+    private String phone;
 }

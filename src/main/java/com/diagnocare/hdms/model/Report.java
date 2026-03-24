@@ -35,10 +35,7 @@ public class Report {
     @JsonIgnore
     @Column(name = "file_content", columnDefinition = "bytea")
     private byte[] fileContent;
-//    private String fileName;
 
-
-//    private String filePath;
 
 
     @ManyToOne

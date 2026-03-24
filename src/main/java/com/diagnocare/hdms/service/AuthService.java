@@ -38,6 +38,7 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole());
         user.setCreatedAt(LocalDateTime.now());
+        user.setPhone(request.getPhone());
 
         // Doctor needs admin approval
         if (request.getRole() == User.Role.DOCTOR) {

@@ -49,7 +49,7 @@
                 </div>
                 <div class="form-group">
                     <label>Booking Date</label>
-                    <input type="date" id="bookingDate">
+                    <input type="date" id="bookingDate" min="">
                 </div>
                 <div class="form-group">
                     <label>Notes</label>
@@ -70,6 +70,8 @@
         const headers   = { 'Authorization': 'Bearer ' + token };
 
         if (!token || role !== 'PATIENT') window.location.href = '/login.html';
+
+        document.getElementById('bookingDate').min = new Date().toISOString().split('T')[0];
 
         document.getElementById('patientName').innerText = 'Hello, ' + name;
 
